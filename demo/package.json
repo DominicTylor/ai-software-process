@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "serve": "http-server . -p 8080 -s"
+    "serve": "http-server . -p 8080 -s -a ::"
   },
   "devDependencies": {
     "http-server": "14.1.1"

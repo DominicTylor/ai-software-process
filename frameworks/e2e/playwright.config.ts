@@ -10,14 +10,14 @@ export default defineConfig({
   testMatch: ['**/e2e/**/*.spec.ts', '**/security/**/*.spec.ts', '**/a11y/**/*.spec.ts'],
   reporter: process.env.CI ? [['github'], ['list']] : 'list',
   use: {
-    baseURL: 'http://localhost:8080',
+    baseURL: 'http://[::1]:8080',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
   },
   webServer: {
     command: 'pnpm --filter @canon/demo serve',
-    url: 'http://localhost:8080',
+    url: 'http://[::1]:8080',
     reuseExistingServer: !process.env.CI,
     timeout: 30_000,
   },
