@@ -1,0 +1,46 @@
+# CODEOWNERS for ai-software-process — applies the canon to this repo itself.
+#
+# Areas of final word are defined in process.md § Roles. Until additional
+# maintainers are added, every domain routes to the current sole maintainer.
+# When new maintainers join, this file expands to split domains per role.
+
+# Canon — touches every role's final-word area; intended to require Owner + Architect + Quality.
+/process.md                   @DominicTylor
+/constitution.md              @DominicTylor
+
+# Public link + contribution guide — Owner domain.
+/README.md                    @DominicTylor
+/CONTRIBUTING.md              @DominicTylor
+/CLAUDE.md                    @DominicTylor
+
+# Templates — Architect + Quality domain.
+/templates/                   @DominicTylor
+
+# Skills and agents — Quality Gate Specialist domain.
+/.claude/skills/              @DominicTylor
+/.claude/agents/              @DominicTylor
+
+# Hooks and CI — Code Owner of this repo.
+/.githooks/                   @DominicTylor
+/.github/                     @DominicTylor
+
+# License — Owner.
+/LICENSE                      @DominicTylor
+
+# Frameworks — Quality Gate Specialist domain.
+/frameworks/                  @DominicTylor
+
+# Demo (code-perimeter surface the framework tests against) — Code Owner of demo.
+/demo/                        @DominicTylor
+
+# Stories — Owner + Quality Gate Specialist joint.
+/stories/                     @DominicTylor
+
+# Workspace plumbing — Code Owner of this repo.
+/package.json                 @DominicTylor
+/pnpm-workspace.yaml          @DominicTylor
+/pnpm-lock.yaml               @DominicTylor
+/tsconfig.base.json           @DominicTylor
+
+# Design docs — Owner.
+/docs/                        @DominicTylor

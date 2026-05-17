@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "$id": "https://raw.githubusercontent.com/DominicTylor/ai-software-process/main/templates/story/user-spec.schema.json",
+  "title": "Story user-spec frontmatter",
+  "description": "Frontmatter schema for stories/**/user-spec.md. See process.md § Artifact ontology → user-spec.md for the full canonical structure.",
+  "type": "object",
+  "required": ["title", "slug"],
+  "additionalProperties": false,
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 3,
+      "description": "Short human-readable Story title. Used in indexes and review tooling."
+    },
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "Kebab-case identifier matching the folder name under stories/."
+    },
+    "enforces": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "description": "Constitution rule slug this Story is subject to or enforces (e.g., 'no-passwords', 'tenant-isolation'). Must match a rule defined in constitution.md."
+      },
+      "description": "Constitution rules this Story touches. Used by /architect-review for cross-checking compliance."
+    },
+    "affects": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "description": "Informational pointer to a code repository, service, or component touched by this Story (e.g., 'apps/web', 'services/auth')."
+      },
+      "description": "Code-perimeter touchpoints. Informational only; the master perimeter does not reach into these — it just notes them."
+    }
+  }
+}

@@ -1,0 +1,39 @@
+name: E2E
+
+on:
+  pull_request:
+    paths:
+      - 'frameworks/**'
+      - 'demo/**'
+      - 'stories/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'tsconfig.base.json'
+      - '.github/workflows/e2e.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: 'package.json'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @canon/e2e-framework exec playwright install-deps chromium
+      - run: pnpm install:browsers
+      - run: pnpm test:e2e
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: frameworks/e2e/playwright-report
+          retention-days: 7

@@ -1,0 +1,42 @@
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  max-width: 32rem;
+  margin: 4rem auto;
+  padding: 0 1rem;
+  color: #222;
+}
+
+main h1 {
+  margin-bottom: 1.5rem;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+label {
+  font-weight: 600;
+}
+
+input {
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+  border: 1px solid #222;
+  background: #222;
+  color: #fff;
+  border-radius: 4px;
+}
+
+button:hover {
+  background: #000;
+}

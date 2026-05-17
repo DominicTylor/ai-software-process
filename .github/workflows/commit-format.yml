@@ -1,0 +1,76 @@
+name: Commit Format
+
+# Validates that every commit on a pull request follows the structured
+# commit format defined in process.md § Decision log when it is a behavioral
+# commit (message starts with `behavior:`). Non-behavioral commits are not
+# gated here.
+#
+# This is the CI-side companion to the local .githooks/commit-msg hook:
+# the hook protects developers from creating a bad commit locally; this
+# workflow protects main from accidentally merging a PR whose commits
+# bypassed the hook (no core.hooksPath set, --no-verify, etc.).
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  validate-commits:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate behavioral commits in PR
+        run: |
+          set -euo pipefail
+
+          base_sha="${{ github.event.pull_request.base.sha }}"
+          head_sha="${{ github.event.pull_request.head.sha }}"
+
+          failures=0
+
+          # Iterate every commit in the PR.
+          for sha in $(git rev-list "${base_sha}..${head_sha}"); do
+            subject=$(git log -1 --format="%s" "$sha")
+            body=$(git log -1 --format="%B" "$sha")
+
+            # Skip non-behavioral commits.
+            if ! echo "$subject" | grep -q '^behavior: '; then
+              continue
+            fi
+
+            echo "Checking behavioral commit $sha — $subject"
+
+            missing=()
+            for section in Why Considered Chose Affects; do
+              if ! echo "$body" | grep -qE "^${section}:[[:space:]]"; then
+                missing+=("$section")
+                continue
+              fi
+              # Substantive content check: ≥ 20 chars after stripping whitespace.
+              content=$(echo "$body" | awk -v h="^${section}:" '
+                $0 ~ h { found=1; sub(h "[[:space:]]*",""); print; next }
+                found && /^[A-Z][A-Za-z]+:[[:space:]]/ { exit }
+                found { print }
+              ' | tr -d '[:space:]')
+              if [ "${#content}" -lt 20 ]; then
+                missing+=("${section} (too short)")
+              fi
+            done
+
+            if [ "${#missing[@]}" -gt 0 ]; then
+              echo "::error::Commit $sha is missing required sections: ${missing[*]}"
+              failures=$((failures + 1))
+            fi
+          done
+
+          if [ "$failures" -gt 0 ]; then
+            echo "::error::$failures behavioral commit(s) violate the structured format. See process.md § Decision log."
+            exit 1
+          fi

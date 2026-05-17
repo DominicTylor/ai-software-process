@@ -1,0 +1,86 @@
+name: Spec Validation
+
+# Validates that every stories/**/user-spec.md in the PR conforms to the
+# JSON Schema at templates/story/user-spec.schema.json.
+#
+# This is the structural half of "skills are soft assistance in a branch,
+# hard gates on the PR" — once a Story PR is opened, malformed user-specs
+# cannot merge regardless of who authored them.
+
+on:
+  pull_request:
+    paths:
+      - 'stories/**/user-spec.md'
+      - 'templates/story/user-spec.schema.json'
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  validate-frontmatter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install validators
+        run: |
+          npm install -g ajv-cli@5
+          pip install pyyaml
+
+      - name: Validate every changed user-spec.md
+        run: |
+          set -euo pipefail
+
+          schema="templates/story/user-spec.schema.json"
+          if [ ! -f "$schema" ]; then
+            echo "::error::Schema not found at $schema"
+            exit 1
+          fi
+
+          failures=0
+          # Collect all user-spec.md files in the repo. Scoping to changed
+          # files is left as a refinement; validating everything is cheap
+          # and catches drift from earlier merges.
+          while IFS= read -r spec; do
+            echo "Validating $spec"
+
+            # Extract YAML frontmatter (between first pair of '---' delimiters).
+            frontmatter=$(awk '
+              /^---$/ { count++; next }
+              count == 1 { print }
+              count >= 2 { exit }
+            ' "$spec")
+
+            if [ -z "$frontmatter" ]; then
+              echo "::error file=$spec::no YAML frontmatter found"
+              failures=$((failures + 1))
+              continue
+            fi
+
+            # Convert YAML to JSON via Python.
+            json=$(echo "$frontmatter" | python -c "import sys,yaml,json; print(json.dumps(yaml.safe_load(sys.stdin) or {}))")
+
+            tmpfile=$(mktemp --suffix=.json)
+            echo "$json" > "$tmpfile"
+
+            if ! ajv validate -s "$schema" -d "$tmpfile" --strict=false 2>&1; then
+              echo "::error file=$spec::frontmatter does not match schema"
+              failures=$((failures + 1))
+            fi
+
+            rm -f "$tmpfile"
+          done < <(find stories -name 'user-spec.md' -type f 2>/dev/null)
+
+          if [ "$failures" -gt 0 ]; then
+            echo "::error::$failures user-spec.md file(s) failed schema validation."
+            exit 1
+          fi

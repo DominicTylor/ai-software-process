@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# commit-msg hook — enforce structured commit format for behavioral commits.
+#
+# Activate via: `git config core.hooksPath .githooks`
+#
+# A commit is treated as "behavioral" if its message starts with `behavior:`.
+# Behavioral commits MUST include:
+#   - Why:        rationale, ≥ 20 chars
+#   - Considered: alternatives weighed
+#   - Chose:      what was chosen and why this one
+#   - Affects:    artifacts/paths impacted
+#
+# Non-behavioral commits (chore:, docs:, fix:, refactor:, etc.) are not gated here.
+
+set -euo pipefail
+
+msg_file="$1"
+msg=$(cat "$msg_file")
+
+# Only enforce on behavioral commits.
+if ! grep -q '^behavior: ' <<<"$msg"; then
+    exit 0
+fi
+
+missing=()
+
+# Each section header must appear and have ≥ 20 chars of content on the same or following lines.
+require_section() {
+    local header="$1"
+    if ! grep -qE "^${header}:[[:space:]]" <<<"$msg"; then
+        missing+=("$header:")
+        return
+    fi
+    local body
+    body=$(awk -v h="^${header}:" '
+        $0 ~ h {found=1; sub(h"[[:space:]]*",""); print; next}
+        found && /^[A-Z][A-Za-z]+:[[:space:]]/ {exit}
+        found {print}
+    ' <<<"$msg" | tr -d '[:space:]')
+    if [[ ${#body} -lt 20 ]]; then
+        missing+=("$header: (too short, needs ≥ 20 chars of substance)")
+    fi
+}
+
+require_section "Why"
+require_section "Considered"
+require_section "Chose"
+require_section "Affects"
+
+if (( ${#missing[@]} > 0 )); then
+    echo "ERROR: behavioral commit message is missing required sections:" >&2
+    for m in "${missing[@]}"; do
+        echo "  - $m" >&2
+    done
+    echo >&2
+    echo "Required format:" >&2
+    echo "  behavior: <short summary>" >&2
+    echo "" >&2
+    echo "  Why: <rationale, ≥ 20 chars>" >&2
+    echo "  Considered: <alternatives>" >&2
+    echo "  Chose: <decision and reason>" >&2
+    echo "  Affects: <paths/artifacts>" >&2
+    exit 1
+fi
+
+exit 0

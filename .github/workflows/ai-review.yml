@@ -1,0 +1,75 @@
+name: AI Review
+
+# Runs the mandatory horizontal-role review skills against every non-draft
+# Story PR, per process.md § Skill philosophy:
+#   - /architect-review        (constitution cross-check, system-wide impact)
+#   - /quality-control-review  (gate coverage, scenario strength)
+#   - /ux-review               (user-visible completeness; conditional)
+#
+# Comments these skills produce are blocking until resolved (fix or explicit
+# acknowledgment). Branch protection on main should require this workflow
+# to succeed before merge.
+#
+# This workflow uses the official anthropics/claude-code-action. The
+# repository must define the ANTHROPIC_API_KEY secret. Adjust the action
+# version and prompt to match your project's Claude setup.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main]
+    paths:
+      - 'stories/**'
+      - 'constitution.md'
+      - 'frameworks/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  ai-review:
+    # Skip drafts — skills are advisory in a branch, blocking on opened PRs.
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run horizontal-role review skills
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # The prompt instructs Claude to invoke the three horizontal-review
+          # skills against the diff and post results as PR comments.
+          # Skills are installed under .claude/skills/ in this repository.
+          prompt: |
+            You are running the mandatory PR review pass defined in process.md § Skill philosophy.
+
+            This PR may touch one or more Stories, scenarios, or the constitution.
+
+            Run the following skills against the changes and post their findings as
+            PR review comments:
+
+            1. /architect-review — read constitution.md and any user-spec.md changes;
+               flag rules the changes touch without a clear path to compliance.
+
+            2. /quality-control-review — read user-spec gate notes and every
+               stories/**/e2e/ scenarios/perf/security/a11y file changed; flag missing
+               coverage, weak assertions, or framework-vocabulary misuse.
+
+            3. /ux-review — runs only if user-visible state is affected (e2e/ or a11y/
+               scenarios changed, or user-spec mentions visible behavior); flag missing
+               states, accessibility gaps, or copy drift.
+
+            For each finding, mark it as `blocking` (must be fixed or explicitly
+            acknowledged before merge) or `advisory` (suggestion). Authors resolve
+            blocking comments by either fixing or writing an explicit acknowledgment
+            in the PR conversation.
+
+            Do not invent issues outside the canon's scope. If nothing meaningful
+            comes up in a domain, say so and move on.
+          # Claude Code may need access to .claude/ to load the skills.
+          # Adjust additional inputs (model, max-turns, etc.) per your project's needs.

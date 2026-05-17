@@ -1,0 +1,39 @@
+# IDE / editor metadata
+.idea/
+.vscode/
+.fleet/
+*.iml
+*~
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
+
+# Node (if e2e framework or tooling lands here later)
+node_modules/
+dist/
+build/
+.pnpm-store/
+
+# Python (if any scripts are added)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Local environment
+.env
+.env.local
+.env.*.local
+
+# Node toolchain & test artifacts
+test-results/
+playwright-report/
+*.tsbuildinfo
