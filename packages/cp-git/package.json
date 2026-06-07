@@ -1,0 +1,10 @@
+{
+  "name": "@canon/cp-git",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": { "typecheck": "tsc --noEmit" },
+  "dependencies": { "@canon/cp-contracts": "workspace:*", "simple-git": "3.27.0" },
+  "devDependencies": { "typescript": "6.0.3", "@types/node": "24.12.4" }
+}
