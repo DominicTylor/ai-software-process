@@ -1,0 +1,21 @@
+{
+  "name": "@canon/cp-server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/main.ts",
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@canon/cp-contracts": "workspace:*",
+    "@canon/cp-core": "workspace:*",
+    "@canon/cp-git": "workspace:*",
+    "@canon/cp-spec": "workspace:*",
+    "fastify": "5.2.1",
+    "@fastify/static": "8.0.4",
+    "socket.io": "4.8.1"
+  },
+  "devDependencies": { "typescript": "6.0.3", "@types/node": "24.12.4", "tsx": "4.19.2", "simple-git": "3.27.0" }
+}
