@@ -68,3 +68,26 @@ describe('computeVector', () => {
     expect(v.nextAction.kind).toBe('fix-commit-format');
   });
 });
+
+describe('computeVector — additional coverage', () => {
+  it('missing spec suggests write-spec', () => {
+    const v = computeVector(branch(), [story({ specPresent: false, specValid: null })], []);
+    expect(v.nextAction.kind).toBe('write-spec');
+  });
+  it('perf scaffold (with e2e implemented) suggests implement-scenarios', () => {
+    const v = computeVector(branch(), [story({ scenarios: [
+      { path: 'e', kind: 'e2e', state: 'implemented', todoCount: 0, implementedCount: 1 },
+      { path: 'p', kind: 'perf', state: 'scaffold', todoCount: 1, implementedCount: 0 },
+    ]})], []);
+    expect(v.nextAction.kind).toBe('implement-scenarios');
+  });
+  it('empty stories on unmerged branch is private-wip with open-pr', () => {
+    const v = computeVector(branch(), [], []);
+    expect(v.state).toBe('private-wip');
+    expect(v.nextAction.kind).toBe('open-pr');
+  });
+  it('merged branch with invalid spec still suggests fix-spec', () => {
+    const v = computeVector(branch({ merged: true }), [story({ specValid: false, specErrors: ['x'] })], []);
+    expect(v.nextAction.kind).toBe('fix-spec');
+  });
+});
