@@ -11,9 +11,17 @@
     "test:e2e": "pnpm --filter @canon/e2e-framework test",
     "test:e2e:ui": "pnpm --filter @canon/e2e-framework test:ui",
     "install:browsers": "pnpm --filter @canon/e2e-framework install:browsers",
-    "typecheck": "pnpm --filter @canon/e2e-framework typecheck"
+    "typecheck": "tsc -b",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "cp:dev": "pnpm --filter @canon/cp-web dev",
+    "cp:server": "pnpm --filter @canon/cp-server dev",
+    "cp:build": "pnpm --filter @canon/cp-web build && pnpm --filter @canon/cp-server build"
   },
   "devDependencies": {
-    "@canon/e2e-framework": "workspace:*"
+    "@canon/e2e-framework": "workspace:*",
+    "typescript": "6.0.3",
+    "vitest": "2.1.8",
+    "@types/node": "24.12.4"
   }
 }

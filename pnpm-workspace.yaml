@@ -1,3 +1,7 @@
 packages:
   - 'frameworks/*'
   - 'demo'
+  - 'packages/*'
+  - 'apps/*'
+allowBuilds:
+  esbuild: true
