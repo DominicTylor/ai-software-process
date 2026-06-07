@@ -29,6 +29,13 @@ beforeAll(async () => {
   writeFileSync(join(dir, 'stories/auth/login/e2e/s.spec.ts'), "test('a', () => {});\n");
   await g.add('.'); await g.commit('behavior: add login\n\nWhy: aaaaaaaaaaaaaaaaaaaaaa\nConsidered: aaaaaaaaaaaaaaaaaaaaaa\nChose: aaaaaaaaaaaaaaaaaaaaaa\nAffects: stories/auth/login');
   await g.checkout('main');
+
+  await g.checkoutLocalBranch('feat/checkout');
+  mkdirSync(join(dir, 'stories/checkout/e2e'), { recursive: true });
+  writeFileSync(join(dir, 'stories/checkout/user-spec.md'), '---\ntitle: User checks out\nslug: checkout\n---\n');
+  writeFileSync(join(dir, 'stories/checkout/e2e/c.spec.ts'), "test('checks out', () => {});\n");
+  await g.add('.'); await g.commit('behavior: add checkout\n\nWhy: aaaaaaaaaaaaaaaaaaaaaa\nConsidered: aaaaaaaaaaaaaaaaaaaaaa\nChose: aaaaaaaaaaaaaaaaaaaaaa\nAffects: stories/checkout');
+  await g.checkout('main');
 });
 
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
@@ -49,6 +56,17 @@ describe('GET /api/vectors', () => {
     const app = buildApp(dir, 'main');
     const res = await app.inject({ method: 'GET', url: '/api/vectors/nope' });
     expect(res.statusCode).toBe(404);
+    await app.close();
+  });
+
+  it('serves a vector whose branch name contains a slash, with flat-layout story', async () => {
+    const app = buildApp(dir, 'main');
+    const res = await app.inject({ method: 'GET', url: '/api/vectors/feat/checkout' });
+    expect(res.statusCode).toBe(200);
+    const v = res.json() as { branch: string; stories: Array<{ slug: string; gates: Array<{ kind: string; state: string }> }> };
+    expect(v.branch).toBe('feat/checkout');
+    expect(v.stories[0]!.slug).toBe('checkout');
+    expect(v.stories[0]!.gates.find((g) => g.kind === 'e2e')!.state).toBe('implemented');
     await app.close();
   });
 });

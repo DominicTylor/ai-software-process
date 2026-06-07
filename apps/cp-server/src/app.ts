@@ -12,8 +12,8 @@ export function buildApp(repoPath: string, main = 'main'): FastifyInstance {
     return { vectors: await assembleVectors(repoPath, main) };
   });
 
-  app.get('/api/vectors/:branch', async (req, reply) => {
-    const { branch } = req.params as { branch: string };
+  app.get('/api/vectors/*', async (req, reply) => {
+    const branch = (req.params as { '*': string })['*'];
     const vectors = await assembleVectors(repoPath, main);
     const found = vectors.find((v) => v.branch === branch);
     if (!found) return reply.code(404).send({ error: 'vector not found' });
