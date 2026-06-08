@@ -3,9 +3,11 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import Fastify, { type FastifyInstance } from 'fastify';
 import fastifyStatic from '@fastify/static';
+import { RunRegistry } from '@canon/cp-workers';
 import { assembleVectors } from './assemble';
+import { registerRunRoutes } from './runs';
 
-export function buildApp(repoPath: string, main = 'main'): FastifyInstance {
+export function buildApp(repoPath: string, main = 'main', registry: RunRegistry = new RunRegistry(repoPath)): FastifyInstance {
   const app = Fastify({ logger: false });
 
   app.get('/api/vectors', async () => {
@@ -19,6 +21,8 @@ export function buildApp(repoPath: string, main = 'main'): FastifyInstance {
     if (!found) return reply.code(404).send({ error: 'vector not found' });
     return found;
   });
+
+  registerRunRoutes(app, registry);
 
   const webDist = join(dirname(fileURLToPath(import.meta.url)), '../../cp-web/dist');
   if (existsSync(webDist)) {

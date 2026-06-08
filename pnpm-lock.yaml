@@ -35,6 +35,9 @@ importers:
       '@canon/cp-spec':
         specifier: workspace:*
         version: link:../../packages/cp-spec
+      '@canon/cp-workers':
+        specifier: workspace:*
+        version: link:../../packages/cp-workers
       '@fastify/static':
         specifier: 8.0.4
         version: 8.0.4
