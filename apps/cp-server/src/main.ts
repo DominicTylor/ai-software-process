@@ -1,10 +1,16 @@
 import { buildApp } from './app';
+import { RunRegistry } from '@canon/cp-workers';
+import { attachRunSockets } from './sockets';
 
 const repoPath = process.env['CP_REPO'] ?? process.cwd();
 const main = process.env['CP_MAIN'] ?? 'main';
 const port = Number(process.env['CP_PORT'] ?? 4317);
 
-const app = buildApp(repoPath, main);
+const registry = new RunRegistry(repoPath);
+const app = buildApp(repoPath, main, registry);
 app.listen({ port, host: '127.0.0.1' })
-  .then(() => console.log(`control-plane API on http://127.0.0.1:${port} (repo: ${repoPath})`))
+  .then(() => {
+    attachRunSockets(app.server, registry);
+    console.log(`control-plane on http://127.0.0.1:${port} (repo: ${repoPath})`);
+  })
   .catch((err) => { console.error(err); process.exit(1); });
