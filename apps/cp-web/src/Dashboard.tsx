@@ -69,6 +69,13 @@ export function Dashboard() {
                   {s.specValid === false ? '  ⚠ spec invalid' : ''}
                 </div>
               ))}
+              {v.forge.prNumber !== undefined && (
+                <div className="text-xs">
+                  <a href={v.forge.url} target="_blank" rel="noreferrer" className="underline">PR #{v.forge.prNumber}</a>
+                  {' · CI '}{v.forge.ci === 'success' ? '✓' : v.forge.ci === 'failure' ? '✗' : v.forge.ci === 'pending' ? '⏳' : '—'}
+                  {' · review: '}{v.forge.approvals}
+                </div>
+              )}
               <div className="pt-2 font-medium">→ {v.nextAction.label}</div>
               <div className="text-xs text-gray-500">{v.nextAction.reason}</div>
             </CardContent>
