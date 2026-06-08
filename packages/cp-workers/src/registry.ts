@@ -15,7 +15,7 @@ interface Run {
 
 export class RunRegistry extends EventEmitter {
   private runs = new Map<string, Run>();
-  constructor(private cwd: string) { super(); }
+  constructor(private cwd: string) { super(); this.setMaxListeners(0); }
 
   start(spec: StartSpec): string {
     const id = randomUUID();
