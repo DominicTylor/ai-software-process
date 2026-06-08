@@ -33,3 +33,12 @@ Trigger processes in the target repo and stream their output live.
 Live streaming over socket.io: connect with `?run=<id>`; server emits `output` (string) and `exit` (code); client emits `input` (stdin) and `resize` `{cols,rows}`. The UI renders this in an xterm.js terminal; interactive agents (Claude/Codex) work via the PTY's stdin.
 
 Runs execute in `CP_REPO`'s current checkout. `CP_AGENT_CMD` overrides the agent command (default `claude`). Local run results are advisory; the canonical "tests passed" gate is CI on the PR (slice 3).
+
+## GitHub forge (slice 3)
+
+Vectors are enriched with PR/CI/review state pulled from `gh pr list` (requires `gh` authenticated):
+
+- `forge: { prState, ci, approvals, prNumber?, url? }` on each vector
+- States reach `under-review` / `ready-to-merge` / `live`; next-actions include `fix-ci`, `address-review`, `wait-ci`, `merge`, `await-review`
+- Best-effort: if `gh` is missing/unauthenticated or the repo has no GitHub remote, forge fields are `unknown` and behavior falls back to local-only
+- `CP_FORGE=0` disables forge fetching
