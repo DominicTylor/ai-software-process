@@ -32,6 +32,18 @@ export interface BranchFacts {
 }
 export interface NextAction { kind: string; label: string; reason: string; }
 export interface StoryReadiness extends StoryFacts { gates: GateReadiness[]; }
+
+export type PrState = 'open' | 'draft' | 'closed' | 'merged';
+export type CiStatus = 'success' | 'failure' | 'pending' | 'none';
+export type ReviewDecision = 'approved' | 'changes_requested' | 'review_required' | 'none';
+export interface ForgeFacts {
+  prNumber: number;
+  url: string;
+  prState: PrState;
+  ci: CiStatus;
+  reviewDecision: ReviewDecision;
+}
+
 export interface Vector {
   branch: string;
   state: VectorState;
@@ -42,7 +54,13 @@ export interface Vector {
   behavioralCommits: BehavioralCommit[];
   candidateOwners: string[];
   nextAction: NextAction;
-  forge: { prState: 'unknown'; ci: 'unknown'; approvals: 'unknown' };
+  forge: {
+    prState: 'unknown' | PrState;
+    ci: 'unknown' | CiStatus;
+    approvals: 'unknown' | ReviewDecision;
+    prNumber?: number;
+    url?: string;
+  };
 }
 
 export type RunType = 'e2e' | 'typecheck' | 'agent' | 'custom';

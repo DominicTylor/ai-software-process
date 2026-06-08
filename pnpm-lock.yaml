@@ -159,6 +159,19 @@ importers:
         specifier: 6.0.3
         version: 6.0.3
 
+  packages/cp-forge:
+    dependencies:
+      '@canon/cp-contracts':
+        specifier: workspace:*
+        version: link:../cp-contracts
+    devDependencies:
+      '@types/node':
+        specifier: 24.12.4
+        version: 24.12.4
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
   packages/cp-git:
     dependencies:
       '@canon/cp-contracts':
