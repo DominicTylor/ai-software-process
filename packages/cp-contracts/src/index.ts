@@ -44,3 +44,13 @@ export interface Vector {
   nextAction: NextAction;
   forge: { prState: 'unknown'; ci: 'unknown'; approvals: 'unknown' };
 }
+
+export type RunType = 'e2e' | 'typecheck' | 'agent' | 'custom';
+export type RunStatus = 'running' | 'exited';
+export interface RunSummary {
+  id: string;
+  label: string;
+  type: RunType;
+  status: RunStatus;
+  exitCode: number | null;
+}

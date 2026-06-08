@@ -1,0 +1,10 @@
+{
+  "name": "@canon/cp-workers",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": { "typecheck": "tsc --noEmit" },
+  "dependencies": { "@canon/cp-contracts": "workspace:*", "node-pty": "1.0.0" },
+  "devDependencies": { "typescript": "6.0.3", "@types/node": "24.12.4" }
+}
