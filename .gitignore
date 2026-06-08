@@ -37,3 +37,6 @@ venv/
 test-results/
 playwright-report/
 *.tsbuildinfo
+
+# Internal planning artifacts (kept outside the canon repo)
+docs/superpowers/
