@@ -29,6 +29,9 @@ importers:
       '@canon/cp-core':
         specifier: workspace:*
         version: link:../../packages/cp-core
+      '@canon/cp-forge':
+        specifier: workspace:*
+        version: link:../../packages/cp-forge
       '@canon/cp-git':
         specifier: workspace:*
         version: link:../../packages/cp-git

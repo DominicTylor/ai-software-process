@@ -3,9 +3,12 @@ import { join } from 'node:path';
 import { readRepo } from '@canon/cp-git';
 import { validateUserSpec, gateKindForPath, parseScenarioSource, parseCodeowners, ownersForPaths, type OwnerRule } from '@canon/cp-spec';
 import { computeVector } from '@canon/cp-core';
-import type { Vector, StoryFacts, ScenarioFile } from '@canon/cp-contracts';
+import type { Vector, StoryFacts, ScenarioFile, ForgeFacts } from '@canon/cp-contracts';
 
 const STORY_MARKERS = ['/user-spec.md', '/e2e/', '/perf/', '/security/', '/a11y/'];
+
+export type ForgeFetcher = (cwd: string) => Promise<Map<string, ForgeFacts>>;
+const noForge: ForgeFetcher = async () => new Map();
 
 // Handles BOTH flat (stories/<slug>/...) and grouped (stories/<group>/<slug>/...) layouts.
 export function storySlugFromPath(path: string): { slug: string; dir: string } | null {
@@ -22,8 +25,9 @@ export function storySlugFromPath(path: string): { slug: string; dir: string } |
   return null;
 }
 
-export async function assembleVectors(repoPath: string, main = 'main'): Promise<Vector[]> {
+export async function assembleVectors(repoPath: string, main = 'main', forgeFetcher: ForgeFetcher = noForge): Promise<Vector[]> {
   const repo = await readRepo(repoPath, main);
+  const forge = await forgeFetcher(repoPath);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { $schema: _unused, ...schema } = JSON.parse(readFileSync(join(repoPath, 'templates/story/user-spec.schema.json'), 'utf8')) as Record<string, unknown>;
   let ownerRules: OwnerRule[];
@@ -64,7 +68,7 @@ export async function assembleVectors(repoPath: string, main = 'main'): Promise<
     }
 
     const owners = ownersForPaths(branch.diffPaths, ownerRules);
-    vectors.push(computeVector(branch, stories, owners));
+    vectors.push(computeVector(branch, stories, owners, forge.get(branch.branch)));
   }
   return vectors;
 }

@@ -4,6 +4,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { simpleGit } from 'simple-git';
 import { buildApp } from './app';
+import type { ForgeFetcher } from './assemble';
+import { RunRegistry } from '@canon/cp-workers';
 
 let dir: string;
 
@@ -67,6 +69,20 @@ describe('GET /api/vectors', () => {
     expect(v.branch).toBe('feat/checkout');
     expect(v.stories[0]!.slug).toBe('checkout');
     expect(v.stories[0]!.gates.find((g) => g.kind === 'e2e')!.state).toBe('implemented');
+    await app.close();
+  });
+
+  it('reflects injected forge facts in the vector', async () => {
+    const stub: ForgeFetcher = async () => new Map([
+      ['feature', { prNumber: 7, url: 'https://x/pull/7', prState: 'open', ci: 'success', reviewDecision: 'approved' }],
+    ]);
+    const app = buildApp(dir, 'main', new RunRegistry(dir), stub);
+    const res = await app.inject({ method: 'GET', url: '/api/vectors' });
+    const body = res.json() as { vectors: Array<{ branch: string; state: string; forge: { prNumber?: number }; nextAction: { kind: string } }> };
+    const feature = body.vectors.find((v) => v.branch === 'feature')!;
+    expect(feature.state).toBe('ready-to-merge');
+    expect(feature.forge.prNumber).toBe(7);
+    expect(feature.nextAction.kind).toBe('merge');
     await app.close();
   });
 });

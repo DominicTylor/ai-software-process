@@ -4,6 +4,7 @@
   "references": [
     { "path": "../../packages/cp-contracts" },
     { "path": "../../packages/cp-core" },
+    { "path": "../../packages/cp-forge" },
     { "path": "../../packages/cp-git" },
     { "path": "../../packages/cp-spec" },
     { "path": "../../packages/cp-workers" }

@@ -1,13 +1,15 @@
 import { buildApp } from './app';
 import { RunRegistry } from '@canon/cp-workers';
 import { attachRunSockets } from './sockets';
+import { fetchForge } from '@canon/cp-forge';
 
 const repoPath = process.env['CP_REPO'] ?? process.cwd();
 const main = process.env['CP_MAIN'] ?? 'main';
 const port = Number(process.env['CP_PORT'] ?? 4317);
 
 const registry = new RunRegistry(repoPath);
-const app = buildApp(repoPath, main, registry);
+const forgeFetcher = process.env.CP_FORGE === '0' ? async () => new Map() : fetchForge;
+const app = buildApp(repoPath, main, registry, forgeFetcher);
 app.listen({ port, host: '127.0.0.1' })
   .then(() => {
     attachRunSockets(app.server, registry);
