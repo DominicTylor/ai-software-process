@@ -91,3 +91,56 @@ describe('computeVector — additional coverage', () => {
     expect(v.nextAction.kind).toBe('fix-spec');
   });
 });
+
+import type { ForgeFacts } from '@canon/cp-contracts';
+
+function forge(over: Partial<ForgeFacts> = {}): ForgeFacts {
+  return { prNumber: 1, url: 'u', prState: 'open', ci: 'success', reviewDecision: 'review_required', ...over };
+}
+
+describe('computeVector — forge', () => {
+  it('open PR with ready story is under-review', () => {
+    const v = computeVector(branch(), [story()], [], forge());
+    expect(v.state).toBe('under-review');
+    expect(v.nextAction.kind).toBe('await-review');
+    expect(v.forge.prState).toBe('open');
+    expect(v.forge.approvals).toBe('review_required');
+    expect(v.forge.prNumber).toBe(1);
+  });
+  it('approved + green is ready-to-merge → merge', () => {
+    const v = computeVector(branch(), [story()], [], forge({ reviewDecision: 'approved', ci: 'success' }));
+    expect(v.state).toBe('ready-to-merge');
+    expect(v.nextAction.kind).toBe('merge');
+  });
+  it('failing CI → fix-ci', () => {
+    const v = computeVector(branch(), [story()], [], forge({ ci: 'failure' }));
+    expect(v.state).toBe('under-review');
+    expect(v.nextAction.kind).toBe('fix-ci');
+  });
+  it('changes requested → address-review', () => {
+    const v = computeVector(branch(), [story()], [], forge({ reviewDecision: 'changes_requested', ci: 'success' }));
+    expect(v.nextAction.kind).toBe('address-review');
+  });
+  it('pending CI → wait-ci', () => {
+    const v = computeVector(branch(), [story()], [], forge({ ci: 'pending' }));
+    expect(v.nextAction.kind).toBe('wait-ci');
+  });
+  it('draft PR is private-wip', () => {
+    const v = computeVector(branch(), [story()], [], forge({ prState: 'draft' }));
+    expect(v.state).toBe('private-wip');
+  });
+  it('merged PR is live', () => {
+    const v = computeVector(branch(), [story()], [], forge({ prState: 'merged' }));
+    expect(v.state).toBe('live');
+    expect(v.nextAction.kind).toBe('none');
+  });
+  it('local readiness still takes priority over forge', () => {
+    const v = computeVector(branch(), [story({ specValid: false, specErrors: ['x'] })], [], forge({ ci: 'failure' }));
+    expect(v.nextAction.kind).toBe('fix-spec');
+  });
+  it('no forge keeps slice-1 behavior (unknown + open-pr)', () => {
+    const v = computeVector(branch(), [story()], []);
+    expect(v.forge.prState).toBe('unknown');
+    expect(v.nextAction.kind).toBe('open-pr');
+  });
+});
