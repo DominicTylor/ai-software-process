@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=24"
+    "node": "26",
+    "pnpm": "12"
   },
-  "packageManager": "pnpm@11.1.2",
   "scripts": {
     "test:e2e": "pnpm --filter @canon/e2e-framework test",
     "test:e2e:ui": "pnpm --filter @canon/e2e-framework test:ui",
